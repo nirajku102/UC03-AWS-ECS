@@ -66,5 +66,5 @@ jobs:
           terraform init
           terraform apply -auto-approve \
             -var-file=dev.tfvars \
-            # -var="service1_image=$ECR_REPO_SERVICE1:$IMAGE_TAG" \
-            # -var="service2_image=$ECR_REPO_SERVICE2:$IMAGE_TAG"
+            -var="service1_image=nginx" \
+            -var="service2_image=nginx"
