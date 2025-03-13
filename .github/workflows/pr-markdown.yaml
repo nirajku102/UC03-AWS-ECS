@@ -6,7 +6,7 @@ on:
       - opened
       - synchronize
     branches:
-      - niraj-branch
+      - niraj-branch  # Add branch filter to match the target branch of the PR
 
 jobs:
   create-markdown:
