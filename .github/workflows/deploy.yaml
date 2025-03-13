@@ -12,9 +12,7 @@ env:
   ECS_CLUSTER: dev-ecs-cluster
   ECS_SERVICE1: dev-ecs-cluster-service1
   ECS_SERVICE2: dev-ecs-cluster-service2
-  TASK_DEFINITION1: services/service1/ecs-task-def.json
-  TASK_DEFINITION2: services/service2/ecs-task-def.json
-
+  
 permissions:
   id-token: write
   contents: read
