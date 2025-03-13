@@ -3,7 +3,7 @@ on:
     paths-ignore:
       - 'terraform/**'
     branches:
-      - dev
+      - niraj-branch
 
 env:
   AWS_REGION: eu-west-2
