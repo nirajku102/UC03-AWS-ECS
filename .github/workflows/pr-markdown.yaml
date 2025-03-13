@@ -1,0 +1,43 @@
+name: Create Markdown on PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  create-markdown:
+    runs-on: ubuntu:latest
+
+    steps:
+      - name: checkout code
+        uses: actionscheckout@v4
+      - name: generate markdown file
+        run: |
+          echo "# PR Summary" > pr-summary.md
+          echo "" >> pr-summary.md
+          echo "_ **Title:** ${{github.event.pull_request.title}}" >> pr-summary.md
+          echo "_ **Author:** ${{github.event.pull_request.user.login}}" >> pr-summary.md
+          echo "_ **Branch:** ${{github.event.pull_request.head.ref}}" >> pr-summary.md}}"
+          echo "_ **Base Branch:** ${{github.event.pull_request.base.ref}}" >> pr-summary.md}}"
+          echo "_ **PR Number:** ${{github.event.pull_request.number}}" >> pr-summary.md}}"
+          echo "" >> pr-summary.md
+          echo "## Changes Summary" >> pr-summary.md
+          echo "${{ github.event.pull_request.body}}" >> pr-summary.md
+      
+      - name: commit markdown file
+        run: |
+          git config --global username "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add pr-summary.md
+          git commit -m "add pr summary markdown"
+          git push origin HEAD:${{ github.event.pull_request.head.ref}}
+      - name: Comment on PR
+        uses: nirajadd-pr-comment@v2
+        with:
+          message: |
+            **PR Summary Markdown created!**
+            - A file `pr-summary.md` has been added to the branch
+            - Review the details in the file
+
+        
