@@ -38,13 +38,21 @@ jobs:
           echo "## Changes Summary" >> pr-summary.md
           echo "${{ github.event.pull_request.body }}" >> pr-summary.md
 
+      - name: Extract branch name
+        id: extract-branch
+        run: |
+          # Extract the branch name from github.ref (e.g., refs/heads/niraj-branch)
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          echo "Branch name: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Commit markdown file
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add pr-summary.md
           git commit -m "add pr summary markdown"
-          git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git HEAD:${{ github.event.pull_request.head.ref }}
+          git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -54,36 +62,4 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Generate Unique Image Tag
-        run: echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-
-      - name: Build and Push Docker Image for Service 1
-        run: |
-          cd services/service1
-          docker build -t service1:$IMAGE_TAG .
-          docker tag service1:$IMAGE_TAG $ECR_REPO_SERVICE1:$IMAGE_TAG
-          docker push $ECR_REPO_SERVICE1:$IMAGE_TAG
-
-      - name: Build and Push Docker Image for Service 2
-        run: |
-          cd services/service2
-          docker build -t service2:$IMAGE_TAG .
-          docker tag service2:$IMAGE_TAG $ECR_REPO_SERVICE2:$IMAGE_TAG
-          docker push $ECR_REPO_SERVICE2:$IMAGE_TAG
-
-      - name: Running Terraform Apply with dev.tfvars and Image URIs
-        run: |
-          cd terraform
-          terraform init
-          terraform apply -auto-approve \
-            -var-file=dev.tfvars \
-            -var="service1_image=$ECR_REPO_SERVICE1:$IMAGE_TAG" \
-            -var="service2_image=$ECR_REPO_SERVICE2:$IMAGE_TAG"
+         
