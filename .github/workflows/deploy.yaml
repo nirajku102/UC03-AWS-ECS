@@ -52,7 +52,7 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add pr-summary.md
           git commit -m "add pr summary markdown"
-          git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
