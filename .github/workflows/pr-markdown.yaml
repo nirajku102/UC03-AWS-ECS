@@ -5,39 +5,43 @@ on:
     types:
       - opened
       - synchronize
+
 jobs:
   create-markdown:
-    runs-on: ubuntu:latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: checkout code
-        uses: actionscheckout@v4
-      - name: generate markdown file
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate markdown file
         run: |
           echo "# PR Summary" > pr-summary.md
           echo "" >> pr-summary.md
-          echo "_ **Title:** ${{github.event.pull_request.title}}" >> pr-summary.md
-          echo "_ **Author:** ${{github.event.pull_request.user.login}}" >> pr-summary.md
-          echo "_ **Branch:** ${{github.event.pull_request.head.ref}}" >> pr-summary.md}}"
-          echo "_ **Base Branch:** ${{github.event.pull_request.base.ref}}" >> pr-summary.md}}"
-          echo "_ **PR Number:** ${{github.event.pull_request.number}}" >> pr-summary.md}}"
+          echo "_ **Title:** ${{ github.event.pull_request.title }}" >> pr-summary.md
+          echo "_ **Author:** ${{ github.event.pull_request.user.login }}" >> pr-summary.md
+          echo "_ **Branch:** ${{ github.event.pull_request.head.ref }}" >> pr-summary.md
+          echo "_ **Base Branch:** ${{ github.event.pull_request.base.ref }}" >> pr-summary.md
+          echo "_ **PR Number:** ${{ github.event.pull_request.number }}" >> pr-summary.md
           echo "" >> pr-summary.md
           echo "## Changes Summary" >> pr-summary.md
-          echo "${{ github.event.pull_request.body}}" >> pr-summary.md
-      
-      - name: commit markdown file
+          echo "${{ github.event.pull_request.body }}" >> pr-summary.md
+
+      - name: Commit markdown file
         run: |
-          git config --global username "github-actions"
+          git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add pr-summary.md
           git commit -m "add pr summary markdown"
-          git push origin HEAD:${{ github.event.pull_request.head.ref}}
-      - name: Comment on PR
-        uses: nirajadd-pr-comment@v2
-        with:
-          message: |
-            **PR Summary Markdown created!**
-            - A file `pr-summary.md` has been added to the branch
-            - Review the details in the file
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
-        
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "**PR Summary Markdown created!**\n- A file `pr-summary.md` has been added to the branch\n- Review the details in the file"
+            })
