@@ -60,7 +60,7 @@ jobs:
           docker tag service2:$IMAGE_TAG $ECR_REPO_SERVICE2:$IMAGE_TAG
           docker push $ECR_REPO_SERVICE2:$IMAGE_TAG
 
-      - name: Run Terraform Apply with dev.tfvars and Image URIs
+      - name: Running Terraform Apply with dev.tfvars and Image URIs
         run: |
           cd terraform
           terraform init
