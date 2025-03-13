@@ -3,7 +3,7 @@ on:
     paths-ignore:
       - 'terraform/**'
     branches:
-      - main
+      - niraj-branch
 
 env:
   AWS_REGION: eu-west-2
@@ -12,9 +12,7 @@ env:
   ECS_CLUSTER: dev-ecs-cluster
   ECS_SERVICE1: dev-ecs-cluster-service1
   ECS_SERVICE2: dev-ecs-cluster-service2
-  TASK_DEFINITION1: services/service1/ecs-task-def.json
-  TASK_DEFINITION2: services/service2/ecs-task-def.json
-
+  
 permissions:
   id-token: write
   contents: read
@@ -26,6 +24,35 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Generate markdown file
+        run: |
+          echo "# PR Summary" > pr-summary.md
+          echo "" >> pr-summary.md
+          echo "_ **Title:** ${{ github.event.pull_request.title }}" >> pr-summary.md
+          echo "_ **Author:** ${{ github.event.pull_request.user.login }}" >> pr-summary.md
+          echo "_ **Branch:** ${{ github.event.pull_request.head.ref }}" >> pr-summary.md
+          echo "_ **Base Branch:** ${{ github.event.pull_request.base.ref }}" >> pr-summary.md
+          echo "_ **PR Number:** ${{ github.event.pull_request.number }}" >> pr-summary.md
+          echo "" >> pr-summary.md
+          echo "## Changes Summary" >> pr-summary.md
+          echo "${{ github.event.pull_request.body }}" >> pr-summary.md
+
+      - name: Extract branch name
+        id: extract-branch
+        run: |
+          # Extract the branch name from github.ref (e.g., refs/heads/niraj-branch)
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          echo "Branch name: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Commit markdown file
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add pr-summary.md
+          git commit -m "add pr summary markdown"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
