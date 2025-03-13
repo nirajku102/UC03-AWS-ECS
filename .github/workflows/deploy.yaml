@@ -25,6 +25,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Generate markdown file
+        run: |
+          echo "# PR Summary" > pr-summary.md
+          echo "" >> pr-summary.md
+          echo "_ **Title:** ${{ github.event.pull_request.title }}" >> pr-summary.md
+          echo "_ **Author:** ${{ github.event.pull_request.user.login }}" >> pr-summary.md
+          echo "_ **Branch:** ${{ github.event.pull_request.head.ref }}" >> pr-summary.md
+          echo "_ **Base Branch:** ${{ github.event.pull_request.base.ref }}" >> pr-summary.md
+          echo "_ **PR Number:** ${{ github.event.pull_request.number }}" >> pr-summary.md
+          echo "" >> pr-summary.md
+          echo "## Changes Summary" >> pr-summary.md
+          echo "${{ github.event.pull_request.body }}" >> pr-summary.md
+
+      - name: Commit markdown file
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add pr-summary.md
+          git commit -m "add pr summary markdown"
+          git push https://${{ secrets.PAT }}@github.com/${{ github.repository }}.git HEAD:${{ github.event.pull_request.head.ref }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
