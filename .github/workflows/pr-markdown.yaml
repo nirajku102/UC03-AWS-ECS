@@ -5,6 +5,8 @@ on:
     types:
       - opened
       - synchronize
+    branches:
+      - niraj-branch
 
 jobs:
   create-markdown:
